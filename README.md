@@ -14,6 +14,9 @@ This Go application automates the process of updating or downloading and setting
 - Go 1.16 or higher
 - Git (for cloning the repository)
 
+> [!WARNING]
+> Backup your existing installation (this tool comes with no warranty, and bugs may happen - please, ALWAYS make backups)!
+
 ## Installation
 
 1. Clone the repository:
