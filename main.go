@@ -27,25 +27,76 @@ func main() {
 		targetDir = os.Args[1]
 	}
 
-	if err := os.MkdirAll(targetDir, os.ModePerm); err != nil {
-		fmt.Println("Error creating target directory:", err)
+	tempDir, err := os.MkdirTemp("", "mediawiki-temp-")
+	if err != nil {
+		fmt.Println("Error creating temporary directory:", err)
 		return
 	}
+	defer os.RemoveAll(tempDir)
 
-	if err := downloadMediaWikiCore(targetDir); err != nil {
+	if err := downloadMediaWikiCore(tempDir); err != nil {
 		fmt.Println("Error downloading MediaWiki core:", err)
 		return
 	}
 
-	if err := downloadExtensionsAndSkins(targetDir); err != nil {
+	if err := downloadExtensionsAndSkins(tempDir); err != nil {
 		fmt.Println("Error downloading extensions and skins:", err)
 		return
 	}
 
-	fmt.Println("MediaWiki core and extensions/skins downloaded successfully.")
+	ignorePaths := []string{"LocalSettings.php", ".htaccess", "images"}
+	if err := copyContents(tempDir, targetDir, ignorePaths); err != nil {
+		fmt.Println("Error copying contents to target directory:", err)
+		return
+	}
+
+	fmt.Println("MediaWiki core and extensions/skins downloaded and copied successfully.")
 }
 
-// Downloads the MediaWiki core from the specified URL and extracts it into the specified path.
+func copyContents(src, dst string, ignorePaths []string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(src, path)
+		if err != nil {
+			return err
+		}
+
+		for _, ignorePath := range ignorePaths {
+			if relPath == ignorePath || strings.HasPrefix(relPath, ignorePath+string(os.PathSeparator)) {
+				return nil
+			}
+		}
+
+		dstPath := filepath.Join(dst, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(dstPath, info.Mode())
+		}
+
+		srcFile, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer srcFile.Close()
+
+		dstFile, err := os.Create(dstPath)
+		if err != nil {
+			return err
+		}
+		defer dstFile.Close()
+
+		_, err = io.Copy(dstFile, srcFile)
+		if err != nil {
+			return err
+		}
+
+		return os.Chmod(dstPath, info.Mode())
+	})
+}
+
 func downloadMediaWikiCore(targetDir string) error {
 	return downloadAndExtract(mediaWikiURL, targetDir, func(path string) string {
 		parts := strings.Split(path, string(filepath.Separator))
@@ -54,7 +105,6 @@ func downloadMediaWikiCore(targetDir string) error {
 	})
 }
 
-// Downloads extensions and skins for MediaWiki from specified `targetDir`.
 func downloadExtensionsAndSkins(targetDir string) error {
 	if err := downloadFromFile("extensions.txt", filepath.Join(targetDir, "extensions")); err != nil {
 		return fmt.Errorf("error downloading extensions: %w", err)
@@ -66,8 +116,6 @@ func downloadExtensionsAndSkins(targetDir string) error {
 	return nil
 }
 
-// Downloads extensions or skins from the specified text file path (one extension/skin name per line).
-// If the `filePath` does not exist, the function returns without error (nothing happens).
 func downloadFromFile(filePath string, targetDir string) error {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil
@@ -87,7 +135,6 @@ func downloadFromFile(filePath string, targetDir string) error {
 	return nil
 }
 
-// Downloads the specified extension or skin from the specified URL and extracts it into the specified path.
 func downloadDist(extensionName string, version string, targetDir string) error {
 	downloadUrl, err := getDownloadUrl(extensionURL, extensionName, version)
 	if err != nil {
@@ -100,7 +147,6 @@ func downloadDist(extensionName string, version string, targetDir string) error 
 	return downloadAndExtract(downloadUrl, targetDir, nil)
 }
 
-// Downloads the specified ".tar.gz" archive file from the specified URL and extracts it into the specified path.
 func downloadAndExtract(url string, targetDir string, renamer extract.Renamer) error {
 	tempFile, err := os.CreateTemp("", "mw-temp-*.tar.gz")
 	if err != nil {
@@ -118,7 +164,6 @@ func downloadAndExtract(url string, targetDir string, renamer extract.Renamer) e
 	return nil
 }
 
-// Extracts the contents of the specified ".tar.gz" archive file into the specified path.
 func extractGzArchive(file io.Reader, targetPath string, renamer extract.Renamer) error {
 	if err := extract.Gz(context.TODO(), file, targetPath, renamer); err != nil {
 		return err
@@ -127,7 +172,6 @@ func extractGzArchive(file io.Reader, targetPath string, renamer extract.Renamer
 	return nil
 }
 
-// Downloads the file from the specified URL and saves it as `targetPath`.
 func downloadFile(url string, targetPath string) error {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -148,8 +192,6 @@ func downloadFile(url string, targetPath string) error {
 	return nil
 }
 
-// Obtains names of all extensions from the specified text file path
-// (one extension name per line) and returns them as a slice of strings.
 func getExtensions(path string) (extensions []string, err error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -165,8 +207,6 @@ func getExtensions(path string) (extensions []string, err error) {
 	return extensions, nil
 }
 
-// Obtains a download URL for an extension or skin for specified MediaWiki extension from the specified
-// extension dist URL (e. g.: https://extdist.wmflabs.org/dist/extensions/).
 func getDownloadUrl(fromUrl string, extensionName string, version string) (downloadUrl string, err error) {
 	resp, err := http.Get(fromUrl)
 	if err != nil {
