@@ -14,7 +14,7 @@ This Go application automates the process of updating or downloading and setting
 - Go 1.16 or higher
 - Git (for cloning the repository)
 
-> [!WARNING]
+> [!CAUTION]
 > Backup your existing installation (this tool comes with no warranty, and bugs may happen - please, ALWAYS make backups)!
 
 ## Installation
@@ -22,8 +22,8 @@ This Go application automates the process of updating or downloading and setting
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/mediawiki-downloader.git
-   cd mediawiki-downloader
+   git clone https://github.com/SKevo18/mediawiki-updater.git
+   cd mediawiki-updater
    ```
 
 2. Install dependencies:
