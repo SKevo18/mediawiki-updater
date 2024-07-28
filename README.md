@@ -1,6 +1,6 @@
-# MediaWiki Downloader
+# MediaWiki Updater & Downloader
 
-This Go application automates the process of downloading and setting up MediaWiki core, extensions, and skins. It's designed to simplify the installation process for MediaWiki, making it easier to get a new wiki up and running quickly.
+This Go application automates the process of updating or downloading and setting up MediaWiki core, extensions, and skins. It's designed to simplify the installation process for MediaWiki, making it easier to get a new wiki up and running quickly.
 
 ## Features
 
