@@ -38,6 +38,8 @@ This Go application automates the process of updating or downloading and setting
    - `extensions.txt`: List the names of desired extensions, one per line.
    - `skins.txt`: List the names of desired skins, one per line.
 
+   If these files do not exist, nothing happens as the tool will ignore that and move on.
+
 2. Run the application:
 
    ```bash
