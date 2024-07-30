@@ -21,6 +21,8 @@ const (
 	skinURL      string = "https://extdist.wmflabs.org/dist/skins/"
 )
 
+var IgnorePaths = []string{"LocalSettings.php", ".htaccess", "images"}
+
 func main() {
 	targetDir := "."
 	if len(os.Args) > 1 {
@@ -44,8 +46,7 @@ func main() {
 		return
 	}
 
-	ignorePaths := []string{"LocalSettings.php", ".htaccess", "images"}
-	if err := copyContents(tempDir, targetDir, ignorePaths); err != nil {
+	if err := copyContents(tempDir, targetDir, IgnorePaths); err != nil {
 		fmt.Println("Error copying contents to target directory:", err)
 		return
 	}
