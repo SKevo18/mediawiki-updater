@@ -4,14 +4,14 @@ This Go application automates the process of updating or downloading and setting
 
 ## Features
 
-- Downloads MediaWiki core (version 1.42.1 by default);
+- Downloads MediaWiki core (version 1.43 by default);
 - Downloads specified extensions and skins;
 - Uses a temporary directory for downloads to prevent overwriting existing files;
 - Ignores specified paths when copying files to the target directory;
 
 ## Prerequisites
 
-- Go 1.16 or higher
+- Go 1.16 or higher (latest version is recommended)
 - Git (for cloning the repository)
 
 > [!CAUTION]
