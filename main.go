@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	versionTag   string = "REL1_42"
-	mediaWikiURL string = "https://releases.wikimedia.org/mediawiki/1.42/mediawiki-core-1.42.1.tar.gz"
+	versionTag   string = "REL1_43"
+	mediaWikiURL string = "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.0.zip"
 	extensionURL string = "https://extdist.wmflabs.org/dist/extensions/"
 	skinURL      string = "https://extdist.wmflabs.org/dist/skins/"
 )
