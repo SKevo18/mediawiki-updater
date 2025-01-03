@@ -16,7 +16,7 @@ import (
 
 const (
 	versionTag   string = "REL1_43"
-	mediaWikiURL string = "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.0.zip"
+	mediaWikiDownloadGzip string = "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.0.tar.gz"
 	extensionURL string = "https://extdist.wmflabs.org/dist/extensions/"
 	skinURL      string = "https://extdist.wmflabs.org/dist/skins/"
 )
@@ -99,7 +99,7 @@ func copyContents(src, dst string, ignorePaths []string) error {
 }
 
 func downloadMediaWikiCore(targetDir string) error {
-	return downloadAndExtract(mediaWikiURL, targetDir, func(path string) string {
+	return downloadAndExtract(mediaWikiDownloadGzip, targetDir, func(path string) string {
 		parts := strings.Split(path, string(filepath.Separator))
 		parts = parts[1:]
 		return strings.Join(parts, string(filepath.Separator))
