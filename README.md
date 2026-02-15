@@ -1,76 +1,160 @@
 # MediaWiki Updater & Downloader
 
-This Go application automates the process of updating or downloading and setting up MediaWiki core, extensions, and skins. It's designed to simplify the installation process for MediaWiki, making it easier to get a new wiki up and running quickly.
+A modern, feature-rich CLI tool for automating MediaWiki installation and updates. Built with Go and Cobra, this tool downloads MediaWiki core along with configured extensions and skins from multiple sources.
 
-## Features
+## ✨ Features
 
-- Downloads MediaWiki core (version 1.43 by default);
-- Downloads specified extensions and skins;
-- Uses a temporary directory for downloads to prevent overwriting existing files;
-- Ignores specified paths when copying files to the target directory;
+- **📦 MediaWiki Core**: Downloads any version from official releases with automatic URL parsing
+- **🧩 Extensions & Skins**: Support for both ExtDist and Git repositories
+- **🔧 Flexible Configuration**: INI-based configuration with version-specific downloads
+- **🏗️ Modular Architecture**: Clean, maintainable codebase with separated concerns
+- **🛡️ Safe Operations**: Preserves important files during updates (LocalSettings.php, images, etc.)
+- **📋 Discovery Tools**: List available versions, extensions, and skins
+- **⚠️ Graceful Handling**: Continues operation even if individual components fail to download
 
-## Prerequisites
+## 🚀 Installation
 
-- Go 1.16 or higher (latest version is recommended)
-- Git (for cloning the repository)
+### Option 1: Download Binary
 
-> [!CAUTION]
-> Backup your existing installation (this tool comes with no warranty, and bugs may happen - please, ALWAYS make backups)!
+Download the latest binary from the [releases page](https://github.com/SKevo18/mediawiki-updater/releases).
 
-## Installation
+### Option 2: Build from Source
 
-1. Clone the repository:
+```bash
+git clone https://github.com/SKevo18/mediawiki-updater.git
+cd mediawiki-updater
+go build -o mediawiki-updater
+```
 
-   ```bash
-   git clone https://github.com/SKevo18/mediawiki-updater.git
-   cd mediawiki-updater
-   ```
+## 📖 Usage
 
-2. Install dependencies:
+### Basic Update
 
-   ```bash
-   go mod tidy
-   ```
+```bash
+./mediawiki-updater --config config.ini --target /path/to/mediawiki
+```
 
-## Usage
+### Available Commands
 
-1. Create two text files in the same directory as the main.go file:
-   - `extensions.txt`: List the names of desired extensions, one per line.
-   - `skins.txt`: List the names of desired skins, one per line.
+```bash
+# Show help
+./mediawiki-updater --help
 
-   If these files do not exist, nothing happens as the tool will ignore that and move on.
+# List available MediaWiki versions
+./mediawiki-updater list versions
 
-2. Run the application:
+# List available extensions
+./mediawiki-updater list extensions
 
-   ```bash
-   go run main.go [target_directory]
-   ```
+# List available skins
+./mediawiki-updater list skins
 
-   If no target directory is specified, the current directory will be used.
+# Update with verbose output
+./mediawiki-updater --verbose --config my-config.ini --target /var/www/mediawiki
+```
 
-## Configuration
+## ⚙️ Configuration
 
-You can modify the following constants in the `main.go` file to customize the download sources:
+Create an INI configuration file (default: `config.ini`) with the following sections:
 
-- `versionTag`: The MediaWiki version tag (default: "REL1_42")
-- `mediaWikiURL`: The URL for the MediaWiki core tarball
-- `extensionURL`: The base URL for extensions
-- `skinURL`: The base URL for skins
+```ini
+[mediawiki]
+version=1.43.1
 
-## Ignored Paths
+[skins]
+; From ExtDist (official distribution)
+extdist1=Vector
+extdist2=Timeless
 
-The following paths are ignored when copying files to the target directory:
+; From Git repository
+git1=https://github.com/StarCitizenWiki/mediawiki-skins-Citizen.git|main
+
+[extensions]
+; From ExtDist
+extdist1=Cite
+extdist2=VisualEditor
+extdist3=WikiEditor
+
+; With specific version
+extdist4=Math|REL1_43
+
+; From Git repository
+git1=https://github.com/wikimedia/mediawiki-extensions-MobileFrontend.git|REL1_43
+```
+
+### Configuration Sections
+
+#### `[mediawiki]`
+
+- `version`: MediaWiki version to download (e.g., "1.43.1")
+
+#### `[extensions]` and `[skins]`
+
+- `extdist=<name>`: Download from ExtDist using the MediaWiki version
+- `extdist=<name>:<version>`: Download specific version from ExtDist
+- `git=<repo-url>:<branch>`: Clone from Git repository (branch defaults to "master")
+
+## 🗂️ Project Structure
+
+```plaintext
+mediawiki-updater/
+├── cmd/                  # Cobra CLI commands
+│   ├── root.go            # Main command
+│   └── list.go            # List subcommands
+├── internal/             # Internal packages
+│   ├── config/             # Configuration parsing
+│   ├── downloader/        # Download management
+│   ├── extractor/         # Archive extraction
+│   ├── mediawiki/         # MediaWiki-specific logic
+│   └── updater/           # Main update orchestration
+├── config.ini        # Default configuration
+├── extensions-sample.ini # Example configuration
+└── main.go               # Application entry point
+```
+
+## 🔧 CLI Options
+
+| Flag | Short | Default | Description |
+|------|-------|---------|-------------|
+| `--config` | `-c` | `config.ini` | Path to configuration file |
+| `--target` | `-t` | `.` | Target directory for installation |
+| `--verbose` | `-v` | `false` | Enable verbose output |
+
+## 🛡️ Preserved Files
+
+The following files/directories are preserved during updates:
 
 - `LocalSettings.php`
 - `.htaccess`
-- `images`
+- `images/`
 
-This ensures that existing configurations and user-uploaded content are not overwritten during the update process.
+## 🏗️ Architecture
 
-## License
+The application follows clean architecture principles:
 
-MIT
+- **Config**: Handles INI file parsing and validation
+- **Downloader**: Manages downloads from ExtDist and Git
+- **Extractor**: Handles archive extraction and file operations
+- **MediaWiki**: Parses official release pages for download URLs
+- **Updater**: Orchestrates the entire update process
 
-## Disclaimer
+## 🤝 Contributing
+
+The usual, e. g.:
+
+1. Fork the repository
+2. Create a new branch
+3. Commit your changes
+4. Push the branch, to your forked repository
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+## ⚠️ Disclaimer
+
+> [!CAUTION]
+> Always backup your existing MediaWiki installation before running this tool. This software comes with no warranty and bugs may occur.
 
 This tool is not officially associated with MediaWiki or the Wikimedia Foundation. Use at your own risk.

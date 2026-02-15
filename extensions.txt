@@ -1,4 +1,0 @@
-Cite
-FlexDiagrams
-VisualEditor
-WikiEditor
